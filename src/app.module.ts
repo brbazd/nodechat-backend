@@ -6,16 +6,21 @@ import { ChatGateway } from './chat/chat.gateway';
 import { DataSource } from 'typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+
+let envFilePath = '.env';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ envFilePath }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
-      database: 'chatchat',
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       logging: true,
       entities: [User],
       migrations: [/*...*/],
@@ -24,6 +29,7 @@ import { User } from './users/entities/user.entity';
       // migrationsRun: false,
     }),
     UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, ChatGateway],

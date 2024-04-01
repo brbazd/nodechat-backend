@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
@@ -13,70 +14,37 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    // private jwtService: JwtService
   ) {}
 
-  // Register
-  async create(createUserDto: CreateUserDto): Promise<any> {
+  
 
-    const existingUser = await this.findByEmail(createUserDto.email);
+  async findOneByEmail(email: string): Promise<User> {
+    return this.usersRepository.findOne({where: {email: email}});
+  }
 
-    if (existingUser) {
-      throw new ConflictException('User already exists with that email address.');
-    }
 
-    if (createUserDto.password != createUserDto.confirm_password) {
-      throw new ConflictException('Failed to confirm password.');
-    }
+  async createUser(dto: CreateUserDto): Promise<any> {
 
     const user = new User();
 
     const saltOrRounds = 10;
-    const hash = await bcrypt.hash(createUserDto.password, saltOrRounds);
+    const hash = await bcrypt.hash(dto.password, saltOrRounds);
 
-    user.username = createUserDto.username;
-    user.email = createUserDto.email;
+    user.username = dto.username;
+    user.email = dto.email;
     user.password = hash;
 
-    this.usersRepository.save(user);
-
-    const {password, ...result} = user;
-
-    return result;
+    return await this.usersRepository.save(user);
   }
-
-  async findByEmail(email: string): Promise<User> {
-    return this.usersRepository.findOne({where: {email: email}});
-  }
-
-  // Login - check user
-  async validate(loginUserDto: LoginUserDto): Promise<any> {
-
-    const user = await this.findByEmail(loginUserDto.email);
-
-    if (!user) {
-      throw new UnauthorizedException('User does not exist');
-    }
-
-    const passwordMatch = await bcrypt.compare(loginUserDto.password, user.password);
-
-    console.log(passwordMatch);
-
-    if(passwordMatch == false) {
-      throw new UnauthorizedException('Invalid password');
-    }
-
-    const {password, ...result} = user
-
-    return result;
-  }
-
+  
 
   findAll() {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number): Promise<User> {
+    return this.usersRepository.findOne({where: {id: id}});
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
