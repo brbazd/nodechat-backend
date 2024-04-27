@@ -1,15 +1,14 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { UsersService } from 'src/users/users.service';
 import * as  bcrypt from 'bcrypt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { jwtConstants } from './constants';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private jwtService: JwtService,
         private usersService: UsersService
     ) {}
 
@@ -50,18 +49,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid password');
     }
 
-    const {password, ...result} = user
+    const {password, refresh_token, ...result} = user
+
+    console.log(result)
 
     return result;
     
   }
 
-//   Generate JWT token for verified user
-  async generateJwt(result: any): Promise<{ access_token: string }> {
-    const payload = { sub: result.id, username: result.username };
-
-    return {
-      access_token: await this.jwtService.signAsync(payload, { secret: jwtConstants.secret }),
-    };
+  async verify(id: number):Promise<any> {
+    return this.usersService.findOne(id)
   }
+
 }

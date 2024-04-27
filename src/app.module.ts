@@ -5,9 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatGateway } from './chat/chat.gateway';
 import { DataSource } from 'typeorm';
 import { UsersModule } from './users/users.module';
-import { User } from './users/entities/user.entity';
+import { User } from './entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { MessagesModule } from './messages/messages.module';
+import { Message } from './entities/message.entity';
 
 let envFilePath = '.env';
 
@@ -22,7 +24,7 @@ let envFilePath = '.env';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       logging: true,
-      entities: [User],
+      entities: [User, Message],
       migrations: [/*...*/],
       synchronize: false,
       // migrationsTableName: 'typeorm_migrations',
@@ -30,6 +32,7 @@ let envFilePath = '.env';
     }),
     UsersModule,
     AuthModule,
+    MessagesModule
   ],
   controllers: [AppController],
   providers: [AppService, ChatGateway],

@@ -1,20 +1,38 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
+import { MessagesService } from 'src/messages/messages.service';
+import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: 'http://localhost:5173',
+    credentials: true,
   },
   namespace: '/chat'
 })
 export class ChatGateway {
+  constructor(
+    private messagesService: MessagesService
+) {}
+
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('ChatGateway');
 
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: { content: string, date: string }): void {
-    this.server.emit('message',payload);
+  handleMessage(client: Socket, payload: any): void {
+    // console.log(client, payload)
+
+    console.log(payload.data)
+
+    payload.data.created_at = new Date()
+
+    this.messagesService.createMessage(payload.data.author, payload.data.content, payload.data.created_at).then((res) => {
+      payload.data.id = res.id
+      this.server.emit('message',payload);
+    }) 
+  
+  
   }
 
   @SubscribeMessage('join')

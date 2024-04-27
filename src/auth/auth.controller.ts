@@ -1,9 +1,9 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { UsersService } from 'src/users/users.service';
-import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { LocalGuard } from './guards/local.guard';
+import { AuthenticatedGuard } from './guards/authenticated.guard';
+
 
 @Controller('auth')
 export class AuthController {
@@ -14,9 +14,24 @@ export class AuthController {
         return this.authService.register(dto);
     }
 
-    @Post('login')
     @UseGuards(LocalGuard)
-    login(@Request() req: object) {
-        return this.authService.generateJwt(req);
+    @Post('login')
+    login(@Request() req: any): any {
+        return {
+            User: req.user,
+            msg: 'User logged in'
+        };
+    }
+
+    @Get('logout')
+        logout(@Request() req): any {
+          req.session.destroy();
+          return { msg: 'The user session has ended' }
+    }
+
+    @UseGuards(AuthenticatedGuard)
+    @Get('verify_user')
+    verifyUser(@Request() req: any) {
+        return this.authService.verify(+req.user.id)
     }
 }
