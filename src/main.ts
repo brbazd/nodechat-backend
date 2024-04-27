@@ -5,9 +5,12 @@ import * as passport from "passport"
 import * as session from "express-session"
 
 async function bootstrap() {
+
+  console.log(process.env.FRONT_API_URL)
+
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONT_API_URL,
     credentials: true
   });
   app.useGlobalPipes(new ValidationPipe());

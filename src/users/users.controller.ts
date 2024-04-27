@@ -5,6 +5,7 @@ import { UpdateUsernameDto } from './dto/update-username.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { LocalGuard } from '../auth/guards/local.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -27,6 +28,14 @@ export class UsersController {
   async changeUsername(@Request() req: any, @Body() updateUsernameDto: UpdateUsernameDto) {
     console.log(req.user)
     return await this.usersService.updateUsername(+req.user.id, updateUsernameDto)
+    // return req.user
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Post('change_password')
+  async changePassword(@Request() req: any, @Body() updatePasswordDto: UpdatePasswordDto) {
+    console.log(req.user)
+    return await this.usersService.updatePassword(+req.user.id, updatePasswordDto)
     // return req.user
   }
 

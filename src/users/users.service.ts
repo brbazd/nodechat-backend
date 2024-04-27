@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 
 @Injectable()
@@ -66,6 +67,28 @@ export class UsersService {
     user.username = dto.username
 
     return await this.usersRepository.save(user);
+  }
+
+  async updatePassword(id: number, dto: UpdatePasswordDto):Promise<any> {
+    const user = await this.findOne(id)
+    
+    const passwordMatch = await bcrypt.compare(dto.old_password, user.password);
+
+    if(passwordMatch == false) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    if (dto.new_password != dto.confirm_password) {
+      throw new ConflictException('Failed to confirm password.');
+    }
+
+    const hash = await bcrypt.hash(dto.new_password, 10);
+
+    user.password = hash
+
+    this.usersRepository.save(user);
+
+    return 'Password changed!'
   }
 
   remove(id: number) {
