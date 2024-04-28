@@ -7,6 +7,6 @@ export class MessagesController {
 
     @Get()
     findAll() {
-    return this.messagesService.getAll();
+    return this.messagesService.getMessageHistory();
   }
 }

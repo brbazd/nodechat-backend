@@ -29,13 +29,14 @@ export class MessagesService {
         
       }
 
-      async getAll(): Promise<any> {
+      async getMessageHistory(): Promise<any> {
         return await this.messagesRepository.find({
             order: {
-                created_at: "ASC"
+                created_at: "DESC"
             },
             relations: {author: true},
-            select: ['id', 'content', 'created_at', 'author']
+            select: ['id', 'content', 'created_at', 'author'],
+            take: 20
         })
       }
 
