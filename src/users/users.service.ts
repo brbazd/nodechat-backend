@@ -21,7 +21,7 @@ export class UsersService {
   
 
   async findOneByEmail(email: string): Promise<User> {
-    return this.usersRepository.findOne({where: {email: email}, select: {password: true, refresh_token: true, email: true, username: true, created_at: true, id: true}});
+    return this.usersRepository.findOne({where: {email: email}, select: {password: true, refresh_token: false, email: true, username: true, created_at: true, id: true}});
   }
 
 
@@ -48,11 +48,15 @@ export class UsersService {
       email: false,
       password: false,
       created_at: true
-    }});
+    },
+    order: {
+      created_at: "DESC"
+    },
+    take:10});
   }
 
   async findOne(id: number): Promise<User> {
-    return this.usersRepository.findOne({where: {id: id}, select: {password: true, refresh_token: true, email: true, username: true, created_at: true, id: true}});
+    return this.usersRepository.findOne({where: {id: id}, select: {password: true, refresh_token: false, email: true, username: true, created_at: true, id: true}});
   }
 
   async updateUsername(id: number, dto: UpdateUsernameDto):Promise<any> {
